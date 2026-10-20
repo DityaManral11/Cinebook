@@ -1,0 +1,1 @@
+import {Router} from 'express';import {createTheatre,listTheatres} from '../controllers/theatres.controller.js';import {requireAdmin,requireAuth} from '../middleware/auth.js';const r=Router();r.get('/',listTheatres);r.post('/',requireAuth,requireAdmin,createTheatre);export default r;
