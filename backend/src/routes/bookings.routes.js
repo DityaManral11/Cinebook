@@ -1,1 +1,0 @@
-import {Router} from 'express';import {createBooking,myBookings} from '../controllers/bookings.controller.js';import {requireAuth} from '../middleware/auth.js';const r=Router();r.use(requireAuth);r.get('/mine',myBookings);r.post('/',createBooking);export default r;
