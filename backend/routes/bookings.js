@@ -9,12 +9,22 @@ import {
 
 const router = Router();
 
+<<<<<<< HEAD
 // Get booked and temporarily reserved seats
+=======
+// Get booked seats for a show
+>>>>>>> origin/main
 router.get('/show/:showId/seats', async (req, res) => {
   const showId = Number(req.params.showId);
 
   if (!Number.isInteger(showId) || showId <= 0) {
+<<<<<<< HEAD
     return res.status(400).json({ message: 'Invalid show ID.' });
+=======
+    return res.status(400).json({
+      message: 'Invalid show ID.'
+    });
+>>>>>>> origin/main
   }
 
   try {
@@ -24,13 +34,20 @@ router.get('/show/:showId/seats', async (req, res) => {
     );
 
     if (!shows.length) {
+<<<<<<< HEAD
       return res.status(404).json({ message: 'Show not found.' });
+=======
+      return res.status(404).json({
+        message: 'Show not found.'
+      });
+>>>>>>> origin/main
     }
 
     const [rows] = await pool.execute(
       `SELECT seats
        FROM bookings
        WHERE show_id = ?
+<<<<<<< HEAD
        AND (
          status = 'CONFIRMED'
          OR (
@@ -38,6 +55,9 @@ router.get('/show/:showId/seats', async (req, res) => {
            AND created_at >= NOW() - INTERVAL 10 MINUTE
          )
        )`,
+=======
+       AND status = 'CONFIRMED'`,
+>>>>>>> origin/main
       [showId]
     );
 
@@ -56,6 +76,10 @@ router.get('/show/:showId/seats', async (req, res) => {
 
   } catch (error) {
     console.error('Load booked seats error:', error);
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     return res.status(500).json({
       message: 'Could not load booked seats.'
     });
@@ -91,12 +115,17 @@ router.get('/mine', requireAuth, requireCustomer, async (req, res) => {
 
   } catch (error) {
     console.error('Load bookings error:', error);
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     return res.status(500).json({
       message: 'Could not load your bookings.'
     });
   }
 });
 
+<<<<<<< HEAD
 // Mock payment: success confirms, failure cancels
 router.post('/:id/mock-payment', requireAuth, requireCustomer, async (req, res) => {
   const bookingId = Number(req.params.id);
@@ -241,11 +270,20 @@ router.post('/:id/mock-payment', requireAuth, requireCustomer, async (req, res) 
 });
 
 // Cancel a confirmed booking
+=======
+// Cancel a booking
+>>>>>>> origin/main
 router.patch('/:id/cancel', requireAuth, requireCustomer, async (req, res) => {
   const bookingId = Number(req.params.id);
 
   if (!Number.isInteger(bookingId) || bookingId <= 0) {
+<<<<<<< HEAD
     return res.status(400).json({ message: 'Invalid booking ID.' });
+=======
+    return res.status(400).json({
+      message: 'Invalid booking ID.'
+    });
+>>>>>>> origin/main
   }
 
   try {
@@ -258,7 +296,13 @@ router.patch('/:id/cancel', requireAuth, requireCustomer, async (req, res) => {
     );
 
     if (!rows.length) {
+<<<<<<< HEAD
       return res.status(404).json({ message: 'Booking not found.' });
+=======
+      return res.status(404).json({
+        message: 'Booking not found.'
+      });
+>>>>>>> origin/main
     }
 
     const booking = rows[0];
@@ -288,17 +332,30 @@ router.patch('/:id/cancel', requireAuth, requireCustomer, async (req, res) => {
       });
     }
 
+<<<<<<< HEAD
     return res.json({ message: 'Booking cancelled successfully!' });
 
   } catch (error) {
     console.error('Cancel booking error:', error);
+=======
+    return res.json({
+      message: 'Booking cancelled successfully!'
+    });
+  } catch (error) {
+    console.error('Cancel booking error:', error);
+
+>>>>>>> origin/main
     return res.status(500).json({
       message: 'Could not cancel booking.'
     });
   }
 });
 
+<<<<<<< HEAD
 // Create pending booking
+=======
+// Create booking
+>>>>>>> origin/main
 router.post('/', requireAuth, requireCustomer, async (req, res) => {
   const { showId, seats } = req.body;
 
@@ -321,7 +378,11 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
   }
 
   const cleanSeats = seats.map(seat =>
+<<<<<<< HEAD
     typeof seat === 'string' ? seat.trim().toUpperCase() : ''
+=======
+    typeof seat === 'string' ? seat.trim() : ''
+>>>>>>> origin/main
   );
 
   if (
@@ -357,6 +418,10 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
 
     if (!shows.length) {
       await connection.rollback();
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
       return res.status(404).json({
         message: 'Selected show was not found.'
       });
@@ -368,6 +433,7 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
       `SELECT seats
        FROM bookings
        WHERE show_id = ?
+<<<<<<< HEAD
        AND (
          status = 'CONFIRMED'
          OR (
@@ -375,6 +441,9 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
            AND created_at >= NOW() - INTERVAL 10 MINUTE
          )
        )`,
+=======
+       AND status = 'CONFIRMED'`,
+>>>>>>> origin/main
       [Number(showId)]
     );
 
@@ -393,6 +462,10 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
 
     if (conflict) {
       await connection.rollback();
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
       return res.status(409).json({
         message: `Seat ${conflict} has already been booked. Please choose another seat.`
       });
@@ -402,10 +475,21 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
 
     if (!Number.isFinite(price) || price <= 0) {
       await connection.rollback();
+<<<<<<< HEAD
       return res.status(400).json({ message: 'Invalid show price.' });
     }
 
     const totalAmount = cleanSeats.length * price;
+=======
+
+      return res.status(400).json({
+        message: 'Invalid show price.'
+      });
+    }
+
+    const totalAmount = cleanSeats.length * price;
+
+>>>>>>> origin/main
     const bookingCode =
       `CB${randomBytes(4).toString('hex').toUpperCase()}`;
 
@@ -423,7 +507,11 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
         total_amount,
         status
       )
+<<<<<<< HEAD
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
+=======
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'CONFIRMED')`,
+>>>>>>> origin/main
       [
         bookingCode,
         req.user.customerId,
@@ -441,11 +529,16 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
     await connection.commit();
 
     return res.status(201).json({
+<<<<<<< HEAD
       message: 'Booking created. Please complete mock payment.',
+=======
+      message: 'Tickets booked successfully!',
+>>>>>>> origin/main
       id: result.insertId,
       bookingCode,
       totalAmount,
       showId: Number(showId),
+<<<<<<< HEAD
       seats: cleanSeats,
       status: 'PENDING'
     });
@@ -454,12 +547,30 @@ router.post('/', requireAuth, requireCustomer, async (req, res) => {
     if (connection) await connection.rollback();
 
     console.error('Booking error:', error);
+=======
+      seats: cleanSeats
+    });
+
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+
+    console.error('Booking error:', error);
+
+>>>>>>> origin/main
     return res.status(500).json({
       message: 'Booking failed. Please try again.'
     });
 
   } finally {
+<<<<<<< HEAD
     if (connection) connection.release();
+=======
+    if (connection) {
+      connection.release();
+    }
+>>>>>>> origin/main
   }
 });
 

@@ -8,8 +8,11 @@ import authRoutes from './routes/auth.js';
 import movieRoutes from './routes/movies.js';
 import bookingRoutes from './routes/bookings.js';
 import showRoutes from './routes/shows.js';
+<<<<<<< HEAD
 import adminRoutes from './routes/admin.js';
 import theatreRoutes from './routes/theatres.js';
+=======
+>>>>>>> origin/main
 
 dotenv.config();
 
@@ -39,8 +42,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/shows', showRoutes);
+<<<<<<< HEAD
 app.use('/api/admin', adminRoutes);
 app.use('/api/theatres', theatreRoutes);
+=======
+>>>>>>> origin/main
 
 app.use((req, res) => {
   res.status(404).json({
