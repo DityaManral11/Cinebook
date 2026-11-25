@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { useEffect, useMemo, useState, useRef } from "react";
-=======
-import { useEffect, useMemo, useState } from "react";
->>>>>>> origin/main
 import { QRCodeSVG } from "qrcode.react";
 import {
   Link,
@@ -32,10 +28,7 @@ import {
   X,
   Armchair,
   LogOut,
-<<<<<<< HEAD
   Download,
-=======
->>>>>>> origin/main
 } from "lucide-react";
 import { api } from "./api";
 import "./App.css";
@@ -153,7 +146,6 @@ const theatres = [
   "INOX, Nehru Place",
 ];
 
-<<<<<<< HEAD
 function Header({
   user,
   onLogout,
@@ -173,11 +165,6 @@ function Header({
     }
   };
 
-=======
-function Header({ user, onLogout }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-
->>>>>>> origin/main
   return (
     <header className="site-header">
       <div className="header-inner">
@@ -205,7 +192,6 @@ function Header({ user, onLogout }) {
           <NavLink to="/movies" onClick={() => setMenuOpen(false)}>
             Movies
           </NavLink>
-<<<<<<< HEAD
           <NavLink to="/experience" onClick={() => setMenuOpen(false)}>
             Experience
           </NavLink>
@@ -217,21 +203,11 @@ function Header({ user, onLogout }) {
             className="nav-link"
             onClick={() => setMenuOpen(false)}
           >
-=======
-          <a href="/#experience" onClick={() => setMenuOpen(false)}>
-            Experience
-          </a>
-          <NavLink to="/my-bookings" onClick={() => setMenuOpen(false)}>
-            My Bookings
-          </NavLink>
-          <NavLink to="/admin/login" className="nav-link">
->>>>>>> origin/main
             Admin Portal
           </NavLink>
         </nav>
 
         <div className="header-actions">
-<<<<<<< HEAD
           <div className="city-selector">
             <MapPin size={17} className="city-icon" />
 
@@ -260,14 +236,6 @@ function Header({ user, onLogout }) {
             <button className="user-chip" onClick={handleLogout}>
               <UserRound size={16} />
               {user.name.split(" ")[0]}
-=======
-          <span className="location-chip">
-            <MapPin size={15} /> Delhi NCR <ChevronDown size={14} />
-          </span>
-          {user ? (
-            <button className="user-chip" onClick={onLogout}>
-              <UserRound size={16} /> {user.name.split(" ")[0]}{" "}
->>>>>>> origin/main
               <LogOut size={14} />
             </button>
           ) : (
@@ -539,11 +507,7 @@ function MoviesPage({ movies }) {
   );
 
   return (
-<<<<<<< HEAD
     <main className="inner-page movies-page">
-=======
-    <main className="inner-page">
->>>>>>> origin/main
       <div className="page-heading">
         <div className="section-kicker">THE MOVIE COLLECTION</div>
         <h1>
@@ -578,11 +542,7 @@ function MoviesPage({ movies }) {
   );
 }
 
-<<<<<<< HEAD
 function MovieDetails({ movies, user, selectedCity }) {
-=======
-function MovieDetails({ movies, user }) {
->>>>>>> origin/main
   const { id } = useParams();
   const navigate = useNavigate();
   const movie = movies.find((m) => String(m.id) === id);
@@ -593,12 +553,9 @@ function MovieDetails({ movies, user }) {
   const [showsError, setShowsError] = useState("");
   const [theatreId, setTheatreId] = useState("");
   const [selectedShowId, setSelectedShowId] = useState("");
-<<<<<<< HEAD
   const [cityTheatreIds, setCityTheatreIds] = useState([]);
   const [theatresLoading, setTheatresLoading] = useState(true);
   const [theatresError, setTheatresError] = useState("");
-=======
->>>>>>> origin/main
 
   const today = (() => {
     const d = new Date();
@@ -658,7 +615,6 @@ function MovieDetails({ movies, user }) {
     };
   }, [id]);
 
-<<<<<<< HEAD
   useEffect(() => {
     let active = true;
 
@@ -687,8 +643,6 @@ function MovieDetails({ movies, user }) {
     };
   }, [selectedCity]);
 
-=======
->>>>>>> origin/main
   // Only show dates which have scheduled shows
   const availableDates = [
     ...new Set(
@@ -696,10 +650,7 @@ function MovieDetails({ movies, user }) {
         .filter((show) => {
           const showDate = String(show.startsAt).slice(0, 10);
           return (
-<<<<<<< HEAD
             cityTheatreIds.includes(String(show.theatreId)) &&
-=======
->>>>>>> origin/main
             showDate >= today &&
             showDate <= maxDate &&
             new Date(show.startsAt) > new Date()
@@ -709,7 +660,6 @@ function MovieDetails({ movies, user }) {
     ),
   ].sort();
 
-<<<<<<< HEAD
   useEffect(() => {
     if (showsLoading || theatresLoading) return;
 
@@ -727,11 +677,6 @@ function MovieDetails({ movies, user }) {
   const dateShows = shows.filter(
     (show) =>
       cityTheatreIds.includes(String(show.theatreId)) &&
-=======
-  // Shows for selected date
-  const dateShows = shows.filter(
-    (show) =>
->>>>>>> origin/main
       String(show.startsAt).slice(0, 10) === date &&
       new Date(show.startsAt) > new Date(),
   );
@@ -851,11 +796,7 @@ function MovieDetails({ movies, user }) {
 
               <label className="field-label">Select date</label>
 
-<<<<<<< HEAD
               {showsLoading || theatresLoading ? (
-=======
-              {showsLoading ? (
->>>>>>> origin/main
                 <p>Finding available dates...</p>
               ) : showsError ? (
                 <p className="notice notice-error">{showsError}</p>
@@ -870,10 +811,7 @@ function MovieDetails({ movies, user }) {
                     return (
                       <button
                         key={showDate}
-<<<<<<< HEAD
                         disabled={showsLoading || theatresLoading}
-=======
->>>>>>> origin/main
                         type="button"
                         className={
                           date === showDate
@@ -907,21 +845,14 @@ function MovieDetails({ movies, user }) {
               )}
 
               <label className="field-label">Select cinema</label>
-<<<<<<< HEAD
               {theatresError && (
                 <p className="notice notice-error">{theatresError}</p>
               )}
-=======
->>>>>>> origin/main
 
               <select
                 className="field-input"
                 value={theatreId}
-<<<<<<< HEAD
                 disabled={showsLoading || theatresLoading || !dateShows.length}
-=======
-                disabled={!dateShows.length}
->>>>>>> origin/main
                 onChange={(e) => {
                   setTheatreId(e.target.value);
                   setSelectedShowId("");
@@ -937,11 +868,7 @@ function MovieDetails({ movies, user }) {
 
               <label className="field-label">Select showtime</label>
 
-<<<<<<< HEAD
               {showsLoading || theatresLoading ? (
-=======
-              {showsLoading ? (
->>>>>>> origin/main
                 <p>Loading showtimes...</p>
               ) : filteredShows.length ? (
                 <div className="time-options">
@@ -999,7 +926,6 @@ function BookingPage({ movies, user }) {
   const [busySeats, setBusySeats] = useState([]);
   const [seatsLoading, setSeatsLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-<<<<<<< HEAD
   const [paying, setPaying] = useState(false);
   const [pendingBooking, setPendingBooking] = useState(null);
   const [paymentResult, setPaymentResult] = useState(null);
@@ -1007,12 +933,6 @@ function BookingPage({ movies, user }) {
 
   const showId = Number(saved.showId);
 
-=======
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const showId = Number(saved.showId);
->>>>>>> origin/main
   useEffect(() => {
     if (!showId) {
       setSeatsLoading(false);
@@ -1022,28 +942,15 @@ function BookingPage({ movies, user }) {
     setSeatsLoading(true);
 
     api(`/bookings/show/${showId}/seats`)
-<<<<<<< HEAD
       .then((data) => setBusySeats(data.bookedSeats || []))
       .catch((e) => setError(e.message))
       .finally(() => setSeatsLoading(false));
   }, [showId]);
 
-=======
-      .then((data) => {
-        setBusySeats(data.bookedSeats || []);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setSeatsLoading(false));
-  }, [showId]);
->>>>>>> origin/main
   const date = saved.date || new Date().toISOString().slice(0, 10);
   const time = saved.time || times[2];
   const theatre = saved.theatre || theatres[0];
   const price = Number(saved.price ?? 220);
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
   const rows = ["A", "B", "C", "D", "E", "F"];
 
   const toggle = (seat) => {
@@ -1060,10 +967,6 @@ function BookingPage({ movies, user }) {
 
   const confirm = async () => {
     setError("");
-<<<<<<< HEAD
-=======
-    setSuccess("");
->>>>>>> origin/main
 
     if (!user) {
       return navigate("/login", {
@@ -1073,11 +976,7 @@ function BookingPage({ movies, user }) {
 
     if (!showId || !Number.isFinite(showId)) {
       return setError(
-<<<<<<< HEAD
         "Show information is missing. Please select a show again.",
-=======
-        "Show information is missing. Please go back and select a show again.",
->>>>>>> origin/main
       );
     }
 
@@ -1090,24 +989,10 @@ function BookingPage({ movies, user }) {
     try {
       const result = await api("/bookings", {
         method: "POST",
-<<<<<<< HEAD
         body: JSON.stringify({ showId, seats: selected }),
       });
 
       setPendingBooking(result);
-=======
-        body: JSON.stringify({
-          showId,
-          seats: selected,
-        }),
-      });
-
-      setSuccess(
-        `Booking confirmed! Your booking code is ${result.bookingCode}.`,
-      );
-      setSelected([]);
-      setBusySeats((old) => [...old, ...selected]);
->>>>>>> origin/main
     } catch (e) {
       setError(e.message);
     } finally {
@@ -1115,7 +1000,6 @@ function BookingPage({ movies, user }) {
     }
   };
 
-<<<<<<< HEAD
   const processPayment = async (paymentSuccess) => {
     if (!pendingBooking) return;
 
@@ -1150,8 +1034,6 @@ function BookingPage({ movies, user }) {
     }
   };
 
-=======
->>>>>>> origin/main
   if (!movie) {
     return (
       <main className="inner-page">
@@ -1170,7 +1052,6 @@ function BookingPage({ movies, user }) {
       <div className="page-heading compact">
         <div className="section-kicker">YOUR MOVIE NIGHT</div>
         <h1>
-<<<<<<< HEAD
           {paymentResult ? (
             <>
               Booking{" "}
@@ -1185,16 +1066,12 @@ function BookingPage({ movies, user }) {
               Pick your <span>perfect seat.</span>
             </>
           )}
-=======
-          Pick your <span>perfect seat.</span>
->>>>>>> origin/main
         </h1>
         <p>
           {movie.title} · {date} · {time}
         </p>
       </div>
 
-<<<<<<< HEAD
       {paymentResult ? (
         <div
           className="booking-summary"
@@ -1383,102 +1260,10 @@ function BookingPage({ movies, user }) {
 
           <p className="summary-small">
             Choose a result to test the demo payment flow.
-=======
-      <div className="seat-layout">
-        <div className="seat-main">
-          <div className="screen-area">
-            <div className="screen-glow"></div>
-            <div className="screen-shape"></div>
-            <span>SCREEN THIS WAY</span>
-          </div>
-
-          <div className="seat-rows">
-            {rows.map((row) => (
-              <div className="seat-row" key={row}>
-                <span className="row-label">{row}</span>
-
-                {Array.from({ length: 8 }, (_, i) => `${row}${i + 1}`).map(
-                  (seat) => (
-                    <button
-                      aria-label={`Seat ${seat}`}
-                      title={seat}
-                      key={seat}
-                      disabled={seatsLoading || busySeats.includes(seat)}
-                      onClick={() => toggle(seat)}
-                      className={`seat ${
-                        busySeats.includes(seat)
-                          ? "booked"
-                          : selected.includes(seat)
-                            ? "chosen"
-                            : ""
-                      }`}
-                    >
-                      <Armchair size={15} />
-                    </button>
-                  ),
-                )}
-
-                <span className="row-label">{row}</span>
-              </div>
-            ))}
-          </div>
-
-          {seatsLoading && <p>Loading seat availability...</p>}
-
-          <div className="seat-legend">
-            <span>
-              <i className="legend-seat available"></i> Available
-            </span>
-            <span>
-              <i className="legend-seat chosen"></i> Selected
-            </span>
-            <span>
-              <i className="legend-seat booked"></i> Occupied
-            </span>
-          </div>
-        </div>
-
-        <aside className="booking-summary">
-          <div className="section-kicker">BOOKING SUMMARY</div>
-          <h2>{movie.title}</h2>
-          <p className="summary-muted">{theatre}</p>
-
-          <div className="summary-line">
-            <span>
-              <CalendarDays size={16} /> Date
-            </span>
-            <strong>{date}</strong>
-          </div>
-
-          <div className="summary-line">
-            <span>
-              <Clock3 size={16} /> Showtime
-            </span>
-            <strong>{time}</strong>
-          </div>
-
-          <div className="summary-line">
-            <span>
-              <Armchair size={16} /> Seats
-            </span>
-            <strong>
-              {selected.length ? selected.join(", ") : "None selected"}
-            </strong>
-          </div>
-
-          <div className="summary-total">
-            <span>Total amount</span>
-            <strong>₹{selected.length * price}</strong>
-          </div>
-
-          <p className="summary-small">
-            ₹{price} per seat · No payment is collected in this demo.
->>>>>>> origin/main
           </p>
 
           {error && <div className="notice notice-error">{error}</div>}
 
-<<<<<<< HEAD
           <button
             className="btn btn-primary btn-wide"
             onClick={() => processPayment(true)}
@@ -1497,26 +1282,6 @@ function BookingPage({ movies, user }) {
           </button>
         </div>
       )}
-=======
-          {success && (
-            <div className="notice notice-success">
-              <Check size={16} /> {success}
-              <br />
-              <Link to="/my-bookings">View my bookings →</Link>
-            </div>
-          )}
-
-          <button
-            className="btn btn-primary btn-wide"
-            onClick={confirm}
-            disabled={submitting}
-          >
-            {submitting ? "Confirming…" : "Confirm booking"}
-            <ArrowRight size={17} />
-          </button>
-        </aside>
-      </div>
->>>>>>> origin/main
 
       <Footer />
     </main>
@@ -1546,7 +1311,6 @@ function AuthPage({ mode, onAuth }) {
 
       localStorage.setItem("cinebook_token", data.token);
       onAuth(data.user);
-<<<<<<< HEAD
       notify(
         mode === "login"
           ? "Welcome back to CineBook!"
@@ -1556,11 +1320,6 @@ function AuthPage({ mode, onAuth }) {
     } catch (err) {
       setError(err.message);
       notify(err.message, "error");
-=======
-      navigate(location.from || "/", { state: location, replace: true });
-    } catch (err) {
-      setError(err.message);
->>>>>>> origin/main
     } finally {
       setBusy(false);
     }
@@ -1649,7 +1408,6 @@ function AuthPage({ mode, onAuth }) {
             <ArrowRight size={17} />
           </button>
 
-<<<<<<< HEAD
           {mode === "login" && (
             <Link
               to="/admin/login"
@@ -1662,8 +1420,6 @@ function AuthPage({ mode, onAuth }) {
             </Link>
           )}
 
-=======
->>>>>>> origin/main
           <div className="auth-switch">
             {mode === "login" ? (
               <>
@@ -1706,17 +1462,11 @@ function AdminLogin({ onAuth }) {
 
       localStorage.setItem("cinebook_token", data.token);
       onAuth(data.user);
-<<<<<<< HEAD
       notify("Welcome to the CineBook admin panel!");
       navigate("/admin", { replace: true });
     } catch (err) {
       setError(err.message);
       notify(err.message, "error");
-=======
-      navigate("/admin", { replace: true });
-    } catch (err) {
-      setError(err.message);
->>>>>>> origin/main
     } finally {
       setBusy(false);
     }
@@ -1812,7 +1562,6 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const [movies, setMovies] = useState([]);
-<<<<<<< HEAD
   const [overview, setOverview] = useState(null);
   const [adminBookings, setAdminBookings] = useState([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
@@ -1827,18 +1576,11 @@ function AdminDashboard({ user, onLogout }) {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTheatreIds, setSelectedTheatreIds] = useState([]);
   const [selectedScreens, setSelectedScreens] = useState({});
-=======
-  const [shows, setShows] = useState([]);
-  const [showOptions, setShowOptions] = useState({ movies: [], screens: [] });
->>>>>>> origin/main
 
   const [showDate, setShowDate] = useState(
     new Date().toISOString().slice(0, 10),
   );
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
   const [showForm, setShowForm] = useState({
     movieId: "",
     screenId: "",
@@ -1853,7 +1595,6 @@ function AdminDashboard({ user, onLogout }) {
   const [creatingShow, setCreatingShow] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-<<<<<<< HEAD
   const [showError, setShowError] = useState("");
   const [showMessage, setShowMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -1940,11 +1681,6 @@ function AdminDashboard({ user, onLogout }) {
 
     URL.revokeObjectURL(url);
   };
-=======
-  const [busy, setBusy] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(emptyForm);
->>>>>>> origin/main
 
   const loadMovies = async () => {
     try {
@@ -1952,10 +1688,7 @@ function AdminDashboard({ user, onLogout }) {
       setMovies(data);
     } catch (err) {
       setError(err.message || "Could not load movies.");
-<<<<<<< HEAD
       notify(err.message || "Could not load movies.", "error");
-=======
->>>>>>> origin/main
     } finally {
       setLoading(false);
     }
@@ -1966,7 +1699,6 @@ function AdminDashboard({ user, onLogout }) {
       const data = await api("/shows/options");
       setShowOptions(data);
     } catch (err) {
-<<<<<<< HEAD
       setShowError(err.message || "Could not load movies and screens.");
       notify(err.message || "Could not load movies and screens.", "error");
     }
@@ -1976,37 +1708,19 @@ function AdminDashboard({ user, onLogout }) {
     if (!date) return;
 
     setShowError("");
-=======
-      setError(err.message || "Could not load movies and screens.");
-    }
-  };
-
-  useEffect(() => {
-    loadMovies();
-    loadShowOptions();
-  }, []);
-
-  const loadShows = async (date = showDate) => {
-    setError("");
->>>>>>> origin/main
     setShowsLoading(true);
 
     try {
       const data = await api(`/shows?date=${date}`);
       setShows(Array.isArray(data) ? data : []);
     } catch (err) {
-<<<<<<< HEAD
       setShowError(err.message || "Could not load shows.");
       notify(err.message || "Could not load shows.", "error");
-=======
-      setError(err.message || "Could not load shows.");
->>>>>>> origin/main
     } finally {
       setShowsLoading(false);
     }
   };
 
-<<<<<<< HEAD
   useEffect(() => {
     loadOverview();
     loadAdminBookings();
@@ -2108,44 +1822,16 @@ function AdminDashboard({ user, onLogout }) {
     } catch (err) {
       setShowError(err.message || "Could not create all shows.");
       notify(err.message || "Could not create all shows.", "error");
-=======
-  const handleCreateShow = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    setCreatingShow(true);
-
-    try {
-      await api("/shows", {
-        method: "POST",
-        body: JSON.stringify({
-          movieId: Number(showForm.movieId),
-          screenId: Number(showForm.screenId),
-          startsAt: `${showForm.date} ${showForm.time}:00`,
-          price: Number(showForm.price),
-          format: showForm.format,
-        }),
-      });
-
-      setMessage("Show created successfully!");
-      setShowDate(showForm.date);
-      await loadShows(showForm.date);
-    } catch (err) {
-      setError(err.message || "Could not create show.");
->>>>>>> origin/main
     } finally {
       setCreatingShow(false);
     }
   };
 
-<<<<<<< HEAD
   const getScreensForTheatre = (theatreId) =>
     showOptions.screens.filter(
       (screen) => String(screen.theatreId) === String(theatreId),
     );
 
-=======
->>>>>>> origin/main
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -2161,10 +1847,7 @@ function AdminDashboard({ user, onLogout }) {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
-<<<<<<< HEAD
     setMessage("");
-=======
->>>>>>> origin/main
   };
 
   const handleSaveMovie = async (e) => {
@@ -2179,25 +1862,17 @@ function AdminDashboard({ user, onLogout }) {
           method: "PUT",
           body: JSON.stringify(getPayload()),
         });
-<<<<<<< HEAD
 
         setMessage("Movie changes saved successfully!");
         notify("Movie updated successfully!");
-=======
-        setMessage("Movie changes saved successfully!");
->>>>>>> origin/main
       } else {
         await api("/movies", {
           method: "POST",
           body: JSON.stringify(getPayload()),
         });
-<<<<<<< HEAD
 
         setMessage("Movie added successfully!");
         notify("Movie added successfully!");
-=======
-        setMessage("Movie added successfully!");
->>>>>>> origin/main
       }
 
       resetForm();
@@ -2205,10 +1880,7 @@ function AdminDashboard({ user, onLogout }) {
       await loadShowOptions();
     } catch (err) {
       setError(err.message || "Could not save movie.");
-<<<<<<< HEAD
       notify(err.message || "Could not save movie.", "error");
-=======
->>>>>>> origin/main
     } finally {
       setBusy(false);
     }
@@ -2216,10 +1888,7 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleEditMovie = (movie) => {
     setEditingId(movie.id);
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
     setForm({
       title: movie.title || "",
       genre: movie.genre || "",
@@ -2235,10 +1904,7 @@ function AdminDashboard({ user, onLogout }) {
       price: String(movie.price ?? 200),
       status: movie.status || "Now Showing",
     });
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
     setError("");
     setMessage("Editing: " + movie.title);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2253,16 +1919,11 @@ function AdminDashboard({ user, onLogout }) {
 
     try {
       await api(`/movies/${movie.id}`, { method: "DELETE" });
-<<<<<<< HEAD
 
       if (editingId === movie.id) resetForm();
 
       setMessage("Movie deleted successfully.");
       notify("Movie deleted successfully!");
-=======
-      if (editingId === movie.id) resetForm();
-      setMessage("Movie deleted successfully.");
->>>>>>> origin/main
       await loadMovies();
       await loadShowOptions();
     } catch (err) {
@@ -2270,21 +1931,14 @@ function AdminDashboard({ user, onLogout }) {
         err.message ||
           "Could not delete movie. It may be linked to existing shows or bookings.",
       );
-<<<<<<< HEAD
       notify(err.message || "Could not delete movie.", "error");
-=======
->>>>>>> origin/main
     } finally {
       setBusy(false);
     }
   };
 
   return (
-<<<<<<< HEAD
     <main className="inner-page admin-dashboard-page">
-=======
-    <main className="inner-page">
->>>>>>> origin/main
       <div className="page-heading">
         <div className="section-kicker">CINEBOOK ADMIN PANEL</div>
         <h1>
@@ -2293,7 +1947,6 @@ function AdminDashboard({ user, onLogout }) {
         <p>Manage your CineBook movies and showtimes.</p>
       </div>
 
-<<<<<<< HEAD
       {/* ADMIN OVERVIEW */}
       <div className="booking-summary" style={{ marginTop: 25 }}>
         <h2>Dashboard Overview</h2>
@@ -2393,8 +2046,6 @@ function AdminDashboard({ user, onLogout }) {
       </div>
 
       {/* MOVIE FORM */}
-=======
->>>>>>> origin/main
       <div className="booking-summary">
         <h2>{editingId !== null ? "Edit Movie" : "Add New Movie"}</h2>
         <p>
@@ -2556,10 +2207,7 @@ function AdminDashboard({ user, onLogout }) {
         </form>
       </div>
 
-<<<<<<< HEAD
       {/* MOVIE COLLECTION */}
-=======
->>>>>>> origin/main
       <div className="booking-summary" style={{ marginTop: 30 }}>
         <h2>Movie Collection</h2>
         <p>Edit movie details, update poster URLs or delete movies.</p>
@@ -2579,13 +2227,9 @@ function AdminDashboard({ user, onLogout }) {
                 gap: 15,
                 padding: "15px 0",
                 borderBottom: "1px solid #29354b",
-<<<<<<< HEAD
                 flexWrap: "nowrap",
                 width: "100%",
                 boxSizing: "border-box",
-=======
-                flexWrap: "wrap",
->>>>>>> origin/main
               }}
             >
               <div
@@ -2594,10 +2238,7 @@ function AdminDashboard({ user, onLogout }) {
                   alignItems: "center",
                   gap: 12,
                   minWidth: 0,
-<<<<<<< HEAD
                   flex: "1 1 auto",
-=======
->>>>>>> origin/main
                 }}
               >
                 {movie.posterUrl && (
@@ -2612,10 +2253,7 @@ function AdminDashboard({ user, onLogout }) {
                     }}
                   />
                 )}
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
                 <div>
                   <strong>{movie.title}</strong>
                   <p
@@ -2627,7 +2265,6 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
               </div>
 
-<<<<<<< HEAD
               <div
                 style={{
                   display: "flex",
@@ -2638,9 +2275,6 @@ function AdminDashboard({ user, onLogout }) {
                   alignItems: "center",
                 }}
               >
-=======
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
->>>>>>> origin/main
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -2649,10 +2283,7 @@ function AdminDashboard({ user, onLogout }) {
                 >
                   Edit Movie
                 </button>
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -2667,10 +2298,7 @@ function AdminDashboard({ user, onLogout }) {
         )}
       </div>
 
-<<<<<<< HEAD
       {/* SHOW MANAGEMENT */}
-=======
->>>>>>> origin/main
       <div className="booking-summary" style={{ marginTop: 30 }}>
         <h2>Manage Shows</h2>
         <p>Schedule movie shows across different dates and screens.</p>
@@ -2684,10 +2312,7 @@ function AdminDashboard({ user, onLogout }) {
               const movie = showOptions.movies.find(
                 (m) => m.id === Number(e.target.value),
               );
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
               setShowForm({
                 ...showForm,
                 movieId: e.target.value,
@@ -2704,7 +2329,6 @@ function AdminDashboard({ user, onLogout }) {
             ))}
           </select>
 
-<<<<<<< HEAD
           <label className="field-label">Select City *</label>
           <select
             className="field-input"
@@ -2716,26 +2340,10 @@ function AdminDashboard({ user, onLogout }) {
             {cities.map((city) => (
               <option key={city} value={city}>
                 {city}
-=======
-          <label className="field-label">Select Theatre Screen *</label>
-          <select
-            className="field-input"
-            value={showForm.screenId}
-            onChange={(e) =>
-              setShowForm({ ...showForm, screenId: e.target.value })
-            }
-            required
-          >
-            <option value="">Choose Screen</option>
-            {showOptions.screens.map((screen) => (
-              <option key={screen.id} value={screen.id}>
-                {screen.theatreName} - {screen.name}
->>>>>>> origin/main
               </option>
             ))}
           </select>
 
-<<<<<<< HEAD
           <label className="field-label">Select Cinemas *</label>
 
           <div
@@ -2843,8 +2451,6 @@ function AdminDashboard({ user, onLogout }) {
             <p>{selectedTheatreIds.length} cinemas selected</p>
           </div>
 
-=======
->>>>>>> origin/main
           <label className="field-label">Show Date *</label>
           <input
             className="field-input"
@@ -2890,49 +2496,34 @@ function AdminDashboard({ user, onLogout }) {
             <option value="IMAX">IMAX</option>
           </select>
 
-<<<<<<< HEAD
           {showError && <div className="notice notice-error">{showError}</div>}
 
           {showMessage && (
             <div className="notice notice-success">{showMessage}</div>
           )}
 
-=======
->>>>>>> origin/main
           <button
             className="btn btn-primary btn-wide"
             disabled={creatingShow}
             style={{ marginTop: 15 }}
           >
             {creatingShow ? "Creating Show..." : "Create Show"}
-<<<<<<< HEAD
-=======
-            {error && <div className="notice notice-error">{error}</div>}
-            {message && <div className="notice notice-success">{message}</div>}
->>>>>>> origin/main
           </button>
         </form>
 
         <hr style={{ margin: "25px 0", borderColor: "#29354b" }} />
 
         <h3>View Scheduled Shows</h3>
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
         <label className="field-label">Select Date</label>
         <input
           className="field-input"
           type="date"
           value={showDate}
-<<<<<<< HEAD
           onChange={(e) => {
             setShowDate(e.target.value);
             setShows([]);
           }}
-=======
-          onChange={(e) => setShowDate(e.target.value)}
->>>>>>> origin/main
         />
 
         <button
@@ -2945,7 +2536,6 @@ function AdminDashboard({ user, onLogout }) {
           {showsLoading ? "Loading..." : "View Shows"}
         </button>
 
-<<<<<<< HEAD
         {showError && (
           <div className="notice notice-error" style={{ marginTop: 15 }}>
             {showError}
@@ -2956,8 +2546,6 @@ function AdminDashboard({ user, onLogout }) {
           <p style={{ marginTop: 15 }}>No shows found for this date.</p>
         )}
 
-=======
->>>>>>> origin/main
         {shows.map((show) => (
           <div
             key={show.id}
@@ -2967,17 +2555,11 @@ function AdminDashboard({ user, onLogout }) {
             }}
           >
             <strong>{show.movieTitle}</strong>
-<<<<<<< HEAD
 
             <p style={{ color: "#94a3b8", fontSize: 13, margin: "5px 0" }}>
               {show.theatreName} · {show.screenName}
             </p>
 
-=======
-            <p style={{ color: "#94a3b8", fontSize: 13, margin: "5px 0" }}>
-              {show.theatreName} · {show.screenName}
-            </p>
->>>>>>> origin/main
             <p style={{ color: "#94a3b8", fontSize: 13, margin: 0 }}>
               {new Date(show.startsAt).toLocaleTimeString("en-IN", {
                 hour: "numeric",
@@ -2987,7 +2569,6 @@ function AdminDashboard({ user, onLogout }) {
             </p>
           </div>
         ))}
-<<<<<<< HEAD
       </div>
 
       {/* BOOKING MANAGEMENT */}
@@ -3280,11 +2861,6 @@ function AdminDashboard({ user, onLogout }) {
               </div>
             );
           })()
-=======
-
-        {shows.length === 0 && (
-          <p style={{ marginTop: 15 }}>No shows found for this date.</p>
->>>>>>> origin/main
         )}
       </div>
 
@@ -3336,7 +2912,6 @@ function MyBookings({ user }) {
       );
 
       if (viewingTicket?.id === bookingId) {
-<<<<<<< HEAD
         setViewingTicket(null);
       }
 
@@ -3345,17 +2920,6 @@ function MyBookings({ user }) {
     } catch (e) {
       setError(e.message);
       notify(e.message, "error");
-=======
-        setViewingTicket((old) => ({
-          ...old,
-          status: "CANCELLED",
-        }));
-      }
-
-      setMessage(result.message);
-    } catch (e) {
-      setError(e.message);
->>>>>>> origin/main
     } finally {
       setCancelling(null);
     }
@@ -3363,11 +2927,7 @@ function MyBookings({ user }) {
 
   if (!user) {
     return (
-<<<<<<< HEAD
       <main className="inner-page admin-dashboard">
-=======
-      <main className="inner-page">
->>>>>>> origin/main
         <div className="empty-state">
           <Ticket size={34} />
           <h3>Sign in to see your bookings</h3>
@@ -3392,10 +2952,6 @@ function MyBookings({ user }) {
       </div>
 
       {error && <div className="notice notice-warn">{error}</div>}
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
       {message && <div className="notice notice-success">{message}</div>}
 
       {loading ? (
@@ -3435,7 +2991,6 @@ function MyBookings({ user }) {
 
                 <strong>₹{Number(b.totalAmount).toFixed(0)}</strong>
 
-<<<<<<< HEAD
                 {b.status === "CONFIRMED" && (
                   <>
                     <button
@@ -3473,31 +3028,6 @@ function MyBookings({ user }) {
                   <p className="summary-small">
                     This booking has been cancelled.
                   </p>
-=======
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setViewingTicket(b)}
-                >
-                  View Ticket
-                </button>
-
-                {b.status === "CONFIRMED" && (
-                  <button
-                    className="btn btn-secondary"
-                    disabled={cancelling === b.id}
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Are you sure you want to cancel this booking?",
-                        )
-                      ) {
-                        cancelBooking(b.id);
-                      }
-                    }}
-                  >
-                    {cancelling === b.id ? "Cancelling..." : "Cancel Booking"}
-                  </button>
->>>>>>> origin/main
                 )}
               </div>
             </article>
@@ -3515,11 +3045,7 @@ function MyBookings({ user }) {
         </div>
       )}
 
-<<<<<<< HEAD
       {viewingTicket && viewingTicket.status === "CONFIRMED" && (
-=======
-      {viewingTicket && (
->>>>>>> origin/main
         <div className="ticket-modal-overlay">
           <div className="digital-ticket">
             <button
@@ -3573,11 +3099,7 @@ function MyBookings({ user }) {
                 {Number(viewingTicket.totalAmount).toFixed(0)}
               </p>
 
-<<<<<<< HEAD
               <span className="status-pill">CONFIRMED</span>
-=======
-              <span className="status-pill">{viewingTicket.status}</span>
->>>>>>> origin/main
             </div>
 
             <div className="digital-ticket-qr">
@@ -3610,7 +3132,6 @@ function MyBookings({ user }) {
   );
 }
 
-<<<<<<< HEAD
 function ToastContainer() {
   const [toast, setToast] = useState(null);
   const timerRef = useRef(null);
@@ -3668,8 +3189,6 @@ function notify(message, type = "success") {
   );
 }
 
-=======
->>>>>>> origin/main
 function Footer() {
   return (
     <footer className="site-footer">
@@ -3701,7 +3220,6 @@ function Footer() {
   );
 }
 
-<<<<<<< HEAD
 function ExperiencePage() {
   return (
     <main className="experience-page">
@@ -3884,12 +3402,6 @@ export default function App() {
   const [apiError, setApiError] = useState("");
   const [cities, setCities] = useState([]);
   const [selectedCity, setSelectedCity] = useState("Delhi");
-=======
-export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [apiError, setApiError] = useState("");
->>>>>>> origin/main
 
   const [user, setUser] = useState(() => {
     try {
@@ -3910,7 +3422,6 @@ export default function App() {
       .finally(() => setLoading(false));
   }, []);
 
-<<<<<<< HEAD
   useEffect(() => {
     api("/theatres/cities")
       .then((data) => {
@@ -3927,16 +3438,11 @@ export default function App() {
       });
   }, []);
 
-=======
->>>>>>> origin/main
   const logout = () => {
     localStorage.removeItem("cinebook_token");
     localStorage.removeItem("cinebook_user");
     setUser(null);
-<<<<<<< HEAD
     notify("You have been signed out!");
-=======
->>>>>>> origin/main
   };
 
   const handleAuth = (nextUser) => {
@@ -3946,7 +3452,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-<<<<<<< HEAD
       <Header
         user={user}
         onLogout={logout}
@@ -3955,16 +3460,12 @@ export default function App() {
         onCityChange={setSelectedCity}
       />
       <ToastContainer />
-=======
-      <Header user={user} onLogout={logout} />
->>>>>>> origin/main
 
       <Routes>
         <Route
           path="/"
           element={<Home movies={movies} loading={loading} error={apiError} />}
         />
-<<<<<<< HEAD
 
         <Route path="/movies" element={<MoviesPage movies={movies} />} />
 
@@ -3979,12 +3480,6 @@ export default function App() {
               selectedCity={selectedCity}
             />
           }
-=======
-        <Route path="/movies" element={<MoviesPage movies={movies} />} />
-        <Route
-          path="/movies/:id"
-          element={<MovieDetails movies={movies} user={user} />}
->>>>>>> origin/main
         />
         <Route
           path="/book/:id"
