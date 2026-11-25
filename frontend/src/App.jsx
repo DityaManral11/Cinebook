@@ -1732,13 +1732,23 @@ function AdminDashboard({ user, onLogout }) {
   useEffect(() => {
     api("/theatres/cities")
       .then((data) => {
-        if (Array.isArray(data)) {
-          setCities(data);
-          setSelectedCity(data[0] || "");
-        }
+        console.log("Cities received:", data);
+
+        const cityList = Array.isArray(data)
+          ? data
+          : Array.isArray(data.cities)
+            ? data.cities
+            : [];
+
+        setCities(cityList);
+
+        setSelectedCity((current) =>
+          cityList.includes(current) ? current : cityList[0] || "",
+        );
       })
-      .catch((err) => {
-        setShowError(err.message || "Could not load cities.");
+      .catch((error) => {
+        console.error("Failed to load cities:", error);
+        setCities([]);
       });
   }, []);
 
