@@ -146,7 +146,13 @@ const theatres = [
   "INOX, Nehru Place",
 ];
 
-function Header({ user, onLogout }) {
+function Header({
+  user,
+  onLogout,
+  cities = [],
+  selectedCity = "Delhi",
+  onCityChange = () => {},
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -186,9 +192,9 @@ function Header({ user, onLogout }) {
           <NavLink to="/movies" onClick={() => setMenuOpen(false)}>
             Movies
           </NavLink>
-          <a href="/#experience" onClick={() => setMenuOpen(false)}>
+          <NavLink to="/experience" onClick={() => setMenuOpen(false)}>
             Experience
-          </a>
+          </NavLink>
           <NavLink to="/my-bookings" onClick={() => setMenuOpen(false)}>
             My Bookings
           </NavLink>
@@ -202,9 +208,29 @@ function Header({ user, onLogout }) {
         </nav>
 
         <div className="header-actions">
-          <span className="location-chip">
-            <MapPin size={15} /> Delhi NCR <ChevronDown size={14} />
-          </span>
+          <div className="city-selector">
+            <MapPin size={17} className="city-icon" />
+
+            <div className="city-selector-content">
+              <span className="city-label">YOUR LOCATION</span>
+
+              <select
+                aria-label="Select city"
+                value={selectedCity}
+                onChange={(e) => onCityChange(e.target.value)}
+                disabled={!cities.length}
+                className="city-select"
+              >
+                {cities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <ChevronDown size={15} className="city-chevron" />
+          </div>
 
           {user ? (
             <button className="user-chip" onClick={handleLogout}>
@@ -481,7 +507,7 @@ function MoviesPage({ movies }) {
   );
 
   return (
-    <main className="inner-page admin-dashboard">
+    <main className="inner-page movies-page">
       <div className="page-heading">
         <div className="section-kicker">THE MOVIE COLLECTION</div>
         <h1>
@@ -516,7 +542,7 @@ function MoviesPage({ movies }) {
   );
 }
 
-function MovieDetails({ movies, user }) {
+function MovieDetails({ movies, user, selectedCity }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const movie = movies.find((m) => String(m.id) === id);
@@ -527,6 +553,9 @@ function MovieDetails({ movies, user }) {
   const [showsError, setShowsError] = useState("");
   const [theatreId, setTheatreId] = useState("");
   const [selectedShowId, setSelectedShowId] = useState("");
+  const [cityTheatreIds, setCityTheatreIds] = useState([]);
+  const [theatresLoading, setTheatresLoading] = useState(true);
+  const [theatresError, setTheatresError] = useState("");
 
   const today = (() => {
     const d = new Date();
@@ -586,6 +615,34 @@ function MovieDetails({ movies, user }) {
     };
   }, [id]);
 
+  useEffect(() => {
+    let active = true;
+
+    setTheatresLoading(true);
+    setTheatresError("");
+    setCityTheatreIds([]);
+    setTheatreId("");
+    setSelectedShowId("");
+
+    api(`/theatres?city=${encodeURIComponent(selectedCity)}`)
+      .then((data) => {
+        if (!active) return;
+
+        const list = Array.isArray(data) ? data : [];
+        setCityTheatreIds(list.map((theatre) => String(theatre.id)));
+      })
+      .catch((error) => {
+        if (active) setTheatresError(error.message);
+      })
+      .finally(() => {
+        if (active) setTheatresLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedCity]);
+
   // Only show dates which have scheduled shows
   const availableDates = [
     ...new Set(
@@ -593,6 +650,7 @@ function MovieDetails({ movies, user }) {
         .filter((show) => {
           const showDate = String(show.startsAt).slice(0, 10);
           return (
+            cityTheatreIds.includes(String(show.theatreId)) &&
             showDate >= today &&
             showDate <= maxDate &&
             new Date(show.startsAt) > new Date()
@@ -602,9 +660,23 @@ function MovieDetails({ movies, user }) {
     ),
   ].sort();
 
+  useEffect(() => {
+    if (showsLoading || theatresLoading) return;
+
+    setDate((currentDate) =>
+      availableDates.includes(currentDate)
+        ? currentDate
+        : availableDates[0] || "",
+    );
+
+    setTheatreId("");
+    setSelectedShowId("");
+  }, [shows, cityTheatreIds, showsLoading, theatresLoading]);
+
   // Shows for selected date
   const dateShows = shows.filter(
     (show) =>
+      cityTheatreIds.includes(String(show.theatreId)) &&
       String(show.startsAt).slice(0, 10) === date &&
       new Date(show.startsAt) > new Date(),
   );
@@ -724,7 +796,7 @@ function MovieDetails({ movies, user }) {
 
               <label className="field-label">Select date</label>
 
-              {showsLoading ? (
+              {showsLoading || theatresLoading ? (
                 <p>Finding available dates...</p>
               ) : showsError ? (
                 <p className="notice notice-error">{showsError}</p>
@@ -739,6 +811,7 @@ function MovieDetails({ movies, user }) {
                     return (
                       <button
                         key={showDate}
+                        disabled={showsLoading || theatresLoading}
                         type="button"
                         className={
                           date === showDate
@@ -772,11 +845,14 @@ function MovieDetails({ movies, user }) {
               )}
 
               <label className="field-label">Select cinema</label>
+              {theatresError && (
+                <p className="notice notice-error">{theatresError}</p>
+              )}
 
               <select
                 className="field-input"
                 value={theatreId}
-                disabled={!dateShows.length}
+                disabled={showsLoading || theatresLoading || !dateShows.length}
                 onChange={(e) => {
                   setTheatreId(e.target.value);
                   setSelectedShowId("");
@@ -792,7 +868,7 @@ function MovieDetails({ movies, user }) {
 
               <label className="field-label">Select showtime</label>
 
-              {showsLoading ? (
+              {showsLoading || theatresLoading ? (
                 <p>Loading showtimes...</p>
               ) : filteredShows.length ? (
                 <div className="time-options">
@@ -1495,6 +1571,11 @@ function AdminDashboard({ user, onLogout }) {
   const [overviewError, setOverviewError] = useState("");
   const [shows, setShows] = useState([]);
   const [showOptions, setShowOptions] = useState({ movies: [], screens: [] });
+  const [cities, setCities] = useState([]);
+  const [theatres, setTheatres] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedTheatreIds, setSelectedTheatreIds] = useState([]);
+  const [selectedScreens, setSelectedScreens] = useState({});
 
   const [showDate, setShowDate] = useState(
     new Date().toISOString().slice(0, 10),
@@ -1648,41 +1729,108 @@ function AdminDashboard({ user, onLogout }) {
     loadShows(new Date().toISOString().slice(0, 10));
   }, []);
 
+  useEffect(() => {
+    api("/theatres/cities")
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCities(data);
+          setSelectedCity(data[0] || "");
+        }
+      })
+      .catch((err) => {
+        setShowError(err.message || "Could not load cities.");
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCity) return;
+
+    setTheatres([]);
+    setSelectedTheatreIds([]);
+    setSelectedScreens({});
+
+    api(`/theatres?city=${encodeURIComponent(selectedCity)}`)
+      .then((data) => {
+        setTheatres(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        setShowError(err.message || "Could not load cinemas.");
+      });
+  }, [selectedCity]);
+
   const handleCreateShow = async (e) => {
     e.preventDefault();
     setShowError("");
     setShowMessage("");
 
-    if (!showForm.movieId || !showForm.screenId || !showForm.date) {
-      setShowError("Please complete all required show details.");
+    if (!showForm.movieId || !showForm.date || !selectedTheatreIds.length) {
+      setShowError("Please select movie, date and at least one cinema.");
+      return;
+    }
+
+    const selectedScreenIds = selectedTheatreIds.flatMap(
+      (theatreId) => selectedScreens[theatreId] || [],
+    );
+
+    if (!selectedScreenIds.length) {
+      setShowError("Please select at least one screen.");
+      return;
+    }
+
+    if (
+      selectedTheatreIds.some(
+        (theatreId) => !selectedScreens[theatreId]?.length,
+      )
+    ) {
+      setShowError("Please select at least one screen for every cinema.");
       return;
     }
 
     setCreatingShow(true);
 
     try {
-      await api("/shows", {
-        method: "POST",
-        body: JSON.stringify({
-          movieId: Number(showForm.movieId),
-          screenId: Number(showForm.screenId),
-          startsAt: `${showForm.date} ${showForm.time}:00`,
-          price: Number(showForm.price),
-          format: showForm.format,
-        }),
-      });
+      for (const screenId of selectedScreenIds) {
+        await api("/shows", {
+          method: "POST",
+          body: JSON.stringify({
+            movieId: Number(showForm.movieId),
+            screenId: Number(screenId),
+            startsAt: `${showForm.date} ${showForm.time}:00`,
+            price: Number(showForm.price),
+            format: showForm.format,
+          }),
+        });
+      }
 
-      setShowMessage("Show created successfully!");
-      notify("New show has been scheduled successfully!");
+      setShowMessage(
+        `Show created successfully on ${selectedScreenIds.length} screens across ${selectedTheatreIds.length} cinemas!`,
+      );
+
+      notify("Shows scheduled successfully!");
       setShowDate(showForm.date);
       await loadShows(showForm.date);
+
+      setSelectedTheatreIds([]);
+      setSelectedScreens({});
+      setShowForm({
+        movieId: "",
+        date: "",
+        time: "09:00",
+        price: "200",
+        format: "2D",
+      });
     } catch (err) {
-      setShowError(err.message || "Could not create show.");
-      notify(err.message || "Could not create show.", "error");
+      setShowError(err.message || "Could not create all shows.");
+      notify(err.message || "Could not create all shows.", "error");
     } finally {
       setCreatingShow(false);
     }
   };
+
+  const getScreensForTheatre = (theatreId) =>
+    showOptions.screens.filter(
+      (screen) => String(screen.theatreId) === String(theatreId),
+    );
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -1790,7 +1938,7 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   return (
-    <main className="inner-page">
+    <main className="inner-page admin-dashboard-page">
       <div className="page-heading">
         <div className="section-kicker">CINEBOOK ADMIN PANEL</div>
         <h1>
@@ -2079,7 +2227,9 @@ function AdminDashboard({ user, onLogout }) {
                 gap: 15,
                 padding: "15px 0",
                 borderBottom: "1px solid #29354b",
-                flexWrap: "wrap",
+                flexWrap: "nowrap",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               <div
@@ -2088,6 +2238,7 @@ function AdminDashboard({ user, onLogout }) {
                   alignItems: "center",
                   gap: 12,
                   minWidth: 0,
+                  flex: "1 1 auto",
                 }}
               >
                 {movie.posterUrl && (
@@ -2114,7 +2265,16 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "nowrap",
+                  flexShrink: 0,
+                  marginLeft: "auto",
+                  alignItems: "center",
+                }}
+              >
                 <button
                   type="button"
                   className="btn btn-outline"
@@ -2169,22 +2329,127 @@ function AdminDashboard({ user, onLogout }) {
             ))}
           </select>
 
-          <label className="field-label">Select Theatre Screen *</label>
+          <label className="field-label">Select City *</label>
           <select
             className="field-input"
-            value={showForm.screenId}
-            onChange={(e) =>
-              setShowForm({ ...showForm, screenId: e.target.value })
-            }
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
             required
           >
-            <option value="">Choose Screen</option>
-            {showOptions.screens.map((screen) => (
-              <option key={screen.id} value={screen.id}>
-                {screen.theatreName} - {screen.name}
+            <option value="">Choose City</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
               </option>
             ))}
           </select>
+
+          <label className="field-label">Select Cinemas *</label>
+
+          <div
+            className="booking-summary"
+            style={{ padding: 15, marginTop: 10 }}
+          >
+            {theatres.map((theatre) => {
+              const theatreId = String(theatre.id);
+              const screens = getScreensForTheatre(theatreId);
+              const isSelected = selectedTheatreIds.includes(theatreId);
+
+              return (
+                <div key={theatre.id} style={{ marginBottom: 16 }}>
+                  <label
+                    style={{ display: "flex", alignItems: "center", gap: 10 }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTheatreIds((prev) => [...prev, theatreId]);
+                        } else {
+                          setSelectedTheatreIds((prev) =>
+                            prev.filter((id) => id !== theatreId),
+                          );
+
+                          setSelectedScreens((prev) => {
+                            const updated = { ...prev };
+                            delete updated[theatreId];
+                            return updated;
+                          });
+                        }
+                      }}
+                    />
+                    <strong>{theatre.name}</strong>
+                  </label>
+
+                  {isSelected && (
+                    <div style={{ marginLeft: 28, marginTop: 10 }}>
+                      <label className="field-label">Select Screens *</label>
+
+                      <div
+                        style={{
+                          padding: 12,
+                          border: "1px solid #29354b",
+                          borderRadius: 8,
+                          marginTop: 8,
+                        }}
+                      >
+                        {screens.map((screen) => {
+                          const screenId = String(screen.id);
+                          const theatreScreens =
+                            selectedScreens[theatreId] || [];
+                          const isScreenSelected =
+                            theatreScreens.includes(screenId);
+
+                          return (
+                            <label
+                              key={screen.id}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                marginBottom: 10,
+                                cursor: "pointer",
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isScreenSelected}
+                                onChange={(e) => {
+                                  setSelectedScreens((prev) => {
+                                    const currentScreens =
+                                      prev[theatreId] || [];
+
+                                    return {
+                                      ...prev,
+                                      [theatreId]: e.target.checked
+                                        ? [...currentScreens, screenId]
+                                        : currentScreens.filter(
+                                            (id) => id !== screenId,
+                                          ),
+                                    };
+                                  });
+                                }}
+                              />
+
+                              <span>{screen.name}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+
+                      <p style={{ color: "#94a3b8", fontSize: 13 }}>
+                        {selectedScreens[theatreId]?.length || 0} screens
+                        selected
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            <p>{selectedTheatreIds.length} cinemas selected</p>
+          </div>
 
           <label className="field-label">Show Date *</label>
           <input
@@ -2955,11 +3220,188 @@ function Footer() {
   );
 }
 
+function ExperiencePage() {
+  return (
+    <main className="experience-page">
+      {/* HERO */}
+      <section className="experience-hero">
+        <div className="experience-hero-content">
+          <span className="section-kicker">THE CINEBOOK EXPERIENCE</span>
+
+          <h1>
+            Movies are better
+            <br />
+            <span>when the experience is unforgettable.</span>
+          </h1>
+
+          <p>
+            From choosing your favourite movie to finding the perfect seat, make
+            every movie night special with CineBook.
+          </p>
+
+          <NavLink to="/movies" className="btn btn-primary">
+            Explore Movies →
+          </NavLink>
+        </div>
+
+        <div className="experience-hero-art">
+          <div className="experience-screen">
+            <span>YOUR NEXT SCENE</span>
+            <strong>BEGINS HERE.</strong>
+            <span className="screen-glow">CINEBOOK</span>
+          </div>
+        </div>
+      </section>
+
+      {/* SEAT SELECTION */}
+      <section className="experience-feature">
+        <div className="experience-feature-visual seat-visual">
+          <div className="seat-demo">
+            {["A", "B", "C", "D"].map((row) => (
+              <div className="seat-row" key={row}>
+                <span>{row}</span>
+                {[1, 2, 3, 4, 5, 6].map((seat) => (
+                  <div
+                    key={seat}
+                    className={`seat-box ${
+                      row === "B" && (seat === 3 || seat === 4)
+                        ? "seat-selected"
+                        : seat === 6
+                          ? "seat-booked"
+                          : ""
+                    }`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <div className="seat-legend">
+            <span>Available</span>
+            <span>Selected</span>
+            <span>Booked</span>
+          </div>
+        </div>
+
+        <div className="experience-feature-copy">
+          <span className="section-kicker">YOUR SEAT, YOUR CHOICE</span>
+          <h2>Find your perfect seat.</h2>
+          <p>
+            Choose the seats you love, check availability and plan your movie
+            outing together. Your perfect view is just a few clicks away.
+          </p>
+        </div>
+      </section>
+
+      {/* FORMATS */}
+      <section className="experience-formats">
+        <div className="experience-section-heading">
+          <span className="section-kicker">CHOOSE YOUR VIEW</span>
+          <h2>Experience movies your way.</h2>
+          <p>Different formats. One unforgettable experience.</p>
+        </div>
+
+        <div className="experience-format-grid">
+          <div className="experience-format-card">
+            <span className="format-number">01</span>
+            <h3>2D</h3>
+            <p>Enjoy every story in classic cinematic quality.</p>
+          </div>
+
+          <div className="experience-format-card featured-format">
+            <span className="format-number">02</span>
+            <h3>3D</h3>
+            <p>Step closer to the action with an immersive view.</p>
+          </div>
+
+          <div className="experience-format-card">
+            <span className="format-number">03</span>
+            <h3>IMAX</h3>
+            <p>Go bigger with a larger-than-life movie experience.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* MOVIE NIGHT */}
+      <section className="experience-feature movie-night-feature">
+        <div className="experience-feature-copy">
+          <span className="section-kicker">MAKE IT A NIGHT</span>
+          <h2>More than just watching a movie.</h2>
+          <p>
+            Discover cinemas across different cities, explore show timings and
+            turn an ordinary evening into a memorable movie night.
+          </p>
+          <NavLink to="/movies" className="btn btn-outline">
+            Find Your Cinema →
+          </NavLink>
+        </div>
+
+        <div className="movie-night-visual">
+          <div className="movie-night-circle">✦</div>
+          <span>LIGHTS DOWN.</span>
+          <strong>STORY ON.</strong>
+          <span className="movie-night-small">MAKE EVERY MOMENT COUNT</span>
+        </div>
+      </section>
+
+      {/* BOOKING STEPS */}
+      <section className="experience-booking">
+        <div className="experience-section-heading">
+          <span className="section-kicker">SIMPLE FROM START TO FINISH</span>
+          <h2>Your movie night in 5 easy steps.</h2>
+        </div>
+
+        <div className="experience-steps">
+          {[
+            [
+              "01",
+              "Choose a movie",
+              "Explore movies and find your next favourite.",
+            ],
+            ["02", "Select a cinema", "Choose your preferred city and cinema."],
+            [
+              "03",
+              "Pick a show",
+              "Find a date and showtime that works for you.",
+            ],
+            [
+              "04",
+              "Select your seats",
+              "Choose available seats for your group.",
+            ],
+            [
+              "05",
+              "Confirm booking",
+              "Review your details and confirm your booking.",
+            ],
+          ].map(([number, title, description]) => (
+            <div className="experience-step" key={number}>
+              <span>{number}</span>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="experience-final-cta">
+          <span className="section-kicker">READY FOR YOUR NEXT MOVIE?</span>
+          <h2>Your next scene starts with CineBook.</h2>
+          <NavLink to="/movies" className="btn btn-primary">
+            Book Your Movie →
+          </NavLink>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
   const [movies, setMovies] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState("");
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("Delhi");
 
   const [user, setUser] = useState(() => {
     try {
@@ -2980,6 +3422,22 @@ export default function App() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    api("/theatres/cities")
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCities(data);
+
+          setSelectedCity((current) =>
+            data.includes(current) ? current : data[0] || "",
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Could not load cities:", error);
+      });
+  }, []);
+
   const logout = () => {
     localStorage.removeItem("cinebook_token");
     localStorage.removeItem("cinebook_user");
@@ -2994,7 +3452,13 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Header user={user} onLogout={logout} />
+      <Header
+        user={user}
+        onLogout={logout}
+        cities={cities}
+        selectedCity={selectedCity}
+        onCityChange={setSelectedCity}
+      />
       <ToastContainer />
 
       <Routes>
@@ -3002,10 +3466,20 @@ export default function App() {
           path="/"
           element={<Home movies={movies} loading={loading} error={apiError} />}
         />
+
         <Route path="/movies" element={<MoviesPage movies={movies} />} />
+
+        <Route path="/experience" element={<ExperiencePage />} />
+
         <Route
           path="/movies/:id"
-          element={<MovieDetails movies={movies} user={user} />}
+          element={
+            <MovieDetails
+              movies={movies}
+              user={user}
+              selectedCity={selectedCity}
+            />
+          }
         />
         <Route
           path="/book/:id"

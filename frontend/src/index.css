@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #f5f7ff;
   background: #070a12;
   font-synthesis: none;
@@ -41,7 +41,7 @@ body,
 button,
 input,
 select {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 button,
@@ -77,4 +77,355 @@ img {
 :focus-visible {
   outline: 2px solid #60a5fa;
   outline-offset: 3px;
+}
+
+/* Make native date and time controls visible in dark theme */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+/* ================================
+   CINEBOOK EXPERIENCE PAGE
+================================ */
+
+.experience-page {
+  max-width: 1250px;
+  margin: auto;
+  padding: 45px 25px 80px;
+  color: #f8fafc;
+}
+
+.experience-hero {
+  min-height: 470px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 35px;
+  padding: 55px;
+  border: 1px solid #203657;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 85% 50%, #173b70 0%, transparent 40%),
+    linear-gradient(120deg, #101d34, #080e1b);
+  overflow: hidden;
+}
+
+.experience-hero-content h1 {
+  font-size: clamp(38px, 5vw, 60px);
+  line-height: 1.12;
+  margin: 20px 0;
+  letter-spacing: -2px;
+}
+
+.experience-hero-content h1 span {
+  color: #4b96ff;
+}
+
+.experience-hero-content p {
+  color: #a8bad3;
+  line-height: 1.8;
+  max-width: 480px;
+  margin-bottom: 28px;
+}
+
+.experience-hero-art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.experience-screen {
+  width: 100%;
+  max-width: 390px;
+  min-height: 250px;
+  padding: 35px;
+  border: 1px solid #4389ed;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center,
+    #235ca2 0%,
+    #10213d 55%,
+    #080e1b 100%
+  );
+  box-shadow: 0 0 65px #246dd344;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  transform: perspective(700px) rotateY(-8deg);
+}
+
+.experience-screen span {
+  color: #a9cfff;
+  font-size: 11px;
+  letter-spacing: 4px;
+}
+
+.experience-screen strong {
+  font-size: 34px;
+  letter-spacing: 2px;
+}
+
+.experience-screen .screen-glow {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.experience-feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 65px;
+  padding: 95px 35px;
+}
+
+.experience-feature-copy h2,
+.experience-section-heading h2 {
+  font-size: clamp(30px, 4vw, 42px);
+  margin: 15px 0;
+  letter-spacing: -1px;
+}
+
+.experience-feature-copy p,
+.experience-section-heading p {
+  color: #9eafc7;
+  line-height: 1.8;
+}
+
+.experience-feature-visual {
+  min-height: 260px;
+  border: 1px solid #203657;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #101f38, #0b1221);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+}
+
+.seat-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.seat-row > span {
+  width: 15px;
+  color: #7890b0;
+  font-size: 12px;
+}
+
+.seat-box {
+  width: 25px;
+  height: 23px;
+  border: 1px solid #4289ed;
+  border-radius: 6px 6px 3px 3px;
+  background: #17365d;
+}
+
+.seat-selected {
+  background: #438fff;
+  box-shadow: 0 0 12px #438fff88;
+}
+
+.seat-booked {
+  background: #384354;
+  border-color: #536174;
+}
+
+.seat-legend {
+  display: flex;
+  gap: 17px;
+  margin-top: 25px;
+  color: #9eafc7;
+  font-size: 11px;
+}
+
+.experience-formats {
+  padding: 65px 0;
+}
+
+.experience-section-heading {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 40px;
+}
+
+.experience-format-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.experience-format-card {
+  min-height: 220px;
+  padding: 30px;
+  border: 1px solid #203657;
+  border-radius: 16px;
+  background: #0d1728;
+  transition: 0.25s ease;
+}
+
+.experience-format-card:hover {
+  transform: translateY(-6px);
+  border-color: #438fff;
+}
+
+.featured-format {
+  background: linear-gradient(145deg, #142e53, #0d1728);
+  border-color: #347bd3;
+}
+
+.format-number {
+  color: #579cff;
+  font-size: 13px;
+}
+
+.experience-format-card h3 {
+  font-size: 36px;
+  margin: 25px 0 10px;
+}
+
+.experience-format-card p {
+  color: #9eafc7;
+  line-height: 1.7;
+}
+
+.movie-night-feature {
+  margin: 45px 0;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #101e35, #0b1221);
+  border: 1px solid #203657;
+}
+
+.movie-night-visual {
+  min-height: 280px;
+  border-radius: 16px;
+  background: radial-gradient(circle at center, #24569a, #10213d 55%, #080e1b);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  box-shadow: inset 0 0 50px #00000055;
+}
+
+.movie-night-circle {
+  font-size: 38px;
+  color: #76b4ff;
+}
+
+.movie-night-visual > span {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #b7d6ff;
+}
+
+.movie-night-visual strong {
+  font-size: 38px;
+}
+
+.movie-night-visual .movie-night-small {
+  font-size: 9px;
+}
+
+.experience-booking {
+  padding: 65px 0 0;
+}
+
+.experience-steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.experience-step {
+  padding: 23px 17px;
+  background: #0d1728;
+  border: 1px solid #203657;
+  border-radius: 13px;
+}
+
+.experience-step > span {
+  color: #4b96ff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.experience-step h3 {
+  font-size: 16px;
+  margin: 20px 0 10px;
+}
+
+.experience-step p {
+  color: #9eafc7;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.experience-final-cta {
+  margin-top: 70px;
+  padding: 55px 20px;
+  text-align: center;
+  border: 1px solid #28528a;
+  border-radius: 20px;
+  background: radial-gradient(circle at top, #183d6b, #0b1424 75%);
+}
+
+.experience-final-cta h2 {
+  font-size: clamp(25px, 4vw, 38px);
+  margin: 17px 0 25px;
+}
+
+@media (max-width: 800px) {
+  .experience-hero {
+    grid-template-columns: 1fr;
+    padding: 35px 25px;
+  }
+
+  .experience-feature {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 60px 10px;
+  }
+
+  .experience-format-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .experience-screen {
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .experience-page {
+    padding: 25px 15px 55px;
+  }
+
+  .experience-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-screen strong {
+    font-size: 27px;
+  }
+
+  .experience-feature-copy h2 {
+    font-size: 30px;
+  }
 }
