@@ -1,52 +1,201 @@
-CREATE DATABASE IF NOT EXISTS cinebook;
-USE cinebook;
 
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  email VARCHAR(160) NOT NULL UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- =========================================
+-- CINEBOOK DATABASE SCHEMA
+-- MySQL 8+
+-- =========================================
 
-CREATE TABLE IF NOT EXISTS movies (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(160) NOT NULL,
-  genre VARCHAR(100) NOT NULL,
-  duration VARCHAR(30) NOT NULL,
-  rating DECIMAL(2,1) NOT NULL DEFAULT 8.0,
-  language VARCHAR(50) NOT NULL DEFAULT 'Hindi',
-  certificate VARCHAR(10) NOT NULL DEFAULT 'UA',
-  description TEXT NOT NULL,
-  poster_url TEXT NOT NULL,
-  banner_url TEXT NOT NULL,
-  release_year INT NOT NULL DEFAULT 2026,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- 1. USERS
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `role` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'customer',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS bookings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  movie_id INT NOT NULL,
-  show_date DATE NOT NULL,
-  show_time VARCHAR(20) NOT NULL,
-  theatre VARCHAR(160) NOT NULL,
-  seats VARCHAR(255) NOT NULL,
-  total_amount DECIMAL(10,2) NOT NULL,
-  booking_code VARCHAR(30) NOT NULL UNIQUE,
-  status ENUM('CONFIRMED','CANCELLED') NOT NULL DEFAULT 'CONFIRMED',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_booking_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE RESTRICT
-);
 
-INSERT INTO movies (title, genre, duration, rating, language, certificate, description, poster_url, banner_url, release_year)
-SELECT * FROM (
-  SELECT 'Beyond the Stars','Sci-Fi / Adventure','2h 18m',8.7,'English','UA','A crew of explorers discovers a signal beyond the edge of the known universe, changing everything they believe about humanity.','https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=600','https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1800',2026
-  UNION ALL SELECT 'Midnight Promise','Romance / Drama','2h 04m',8.1,'Hindi','UA','Two strangers cross paths in a city that never sleeps, and learn that the right moment can change a lifetime.','https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600','https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1800',2026
-  UNION ALL SELECT 'The Last Clue','Mystery / Thriller','2h 11m',8.4,'Hindi','UA','A sharp young investigator has one night to solve a case where every witness is hiding something.','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1800',2026
-  UNION ALL SELECT 'Pixel Planet','Animation / Family','1h 46m',7.9,'English','U','A curious inventor and a tiny robot set off on a colourful journey to save their home world.','https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=600','https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=600',2026
-  UNION ALL SELECT 'Redline','Action / Crime','2h 09m',8.2,'Hindi','A','A former racer is pulled into a high-stakes chase through a city full of secrets and shifting loyalties.','https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600','https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1800',2026
-  UNION ALL SELECT 'Ocean Between Us','Drama / Romance','1h 58m',7.8,'Hindi','UA','A heartfelt story about family, distance, and the choices that bring people home.','https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=600','https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800',2026
-) AS sample
-WHERE NOT EXISTS (SELECT 1 FROM movies LIMIT 1);
+-- 2. CUSTOMERS
+CREATE TABLE `customers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `name` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` enum('customer','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'customer',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `uq_customers_user_id` (`user_id`),
+  CONSTRAINT `fk_customers_user`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 3. MOVIES
+CREATE TABLE `movies` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `genre` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duration_minutes` smallint unsigned NOT NULL,
+  `rating` decimal(3,1) DEFAULT NULL,
+  `release_year` year NOT NULL,
+  `certificate` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `poster_url` text COLLATE utf8mb4_unicode_ci,
+  `backdrop_url` text COLLATE utf8mb4_unicode_ci,
+  `synopsis` text COLLATE utf8mb4_unicode_ci,
+  `cast_json` json DEFAULT NULL,
+  `director` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_price` decimal(10,2) DEFAULT '200.00',
+  `status` enum('Now Showing','Coming Soon') COLLATE utf8mb4_unicode_ci DEFAULT 'Now Showing',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 4. THEATRES
+CREATE TABLE `theatres` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `city` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amenities` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 5. SCREENS
+CREATE TABLE `screens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `theatre_id` bigint unsigned NOT NULL,
+  `name` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `format` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_seats` smallint unsigned DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_screen_name` (`theatre_id`,`name`),
+  CONSTRAINT `screens_ibfk_1`
+    FOREIGN KEY (`theatre_id`) REFERENCES `theatres` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 6. SEATS
+CREATE TABLE `seats` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `screen_id` bigint unsigned NOT NULL,
+  `seat_row` char(2) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `seat_number` smallint unsigned NOT NULL,
+  `seat_type` enum('standard','premium','recliner') COLLATE utf8mb4_unicode_ci DEFAULT 'standard',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_seat_position` (`screen_id`,`seat_row`,`seat_number`),
+  CONSTRAINT `seats_ibfk_1`
+    FOREIGN KEY (`screen_id`) REFERENCES `screens` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 7. SHOWS
+CREATE TABLE `shows` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `movie_id` bigint unsigned NOT NULL,
+  `screen_id` bigint unsigned NOT NULL,
+  `starts_at` datetime NOT NULL,
+  `ends_at` datetime NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `language` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `format` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_shows_movie_date` (`movie_id`,`starts_at`),
+  KEY `idx_shows_screen_date` (`screen_id`,`starts_at`),
+  CONSTRAINT `shows_ibfk_1`
+    FOREIGN KEY (`movie_id`) REFERENCES `movies` (`id`),
+  CONSTRAINT `shows_ibfk_2`
+    FOREIGN KEY (`screen_id`) REFERENCES `screens` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 8. BOOKINGS
+CREATE TABLE `bookings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `booking_code` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_id` bigint unsigned NOT NULL,
+  `show_id` bigint unsigned NOT NULL,
+  `status` enum('PENDING','CONFIRMED','CANCELLED') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
+  `total_amount` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `movie_id` bigint unsigned DEFAULT NULL,
+  `show_date` date DEFAULT NULL,
+  `show_time` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `theatre` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `seats` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `booking_code` (`booking_code`),
+  KEY `show_id` (`show_id`),
+  KEY `idx_bookings_customer` (`customer_id`,`created_at`),
+  CONSTRAINT `bookings_ibfk_1`
+    FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`),
+  CONSTRAINT `bookings_ibfk_2`
+    FOREIGN KEY (`show_id`) REFERENCES `shows` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 9. BOOKING SEATS
+CREATE TABLE `booking_seats` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint unsigned NOT NULL,
+  `show_id` bigint unsigned NOT NULL,
+  `seat_id` bigint unsigned NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_show_seat` (`show_id`,`seat_id`),
+  KEY `seat_id` (`seat_id`),
+  KEY `idx_booking_seats_booking` (`booking_id`),
+  CONSTRAINT `booking_seats_ibfk_1`
+    FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE CASCADE,
+  CONSTRAINT `booking_seats_ibfk_2`
+    FOREIGN KEY (`show_id`) REFERENCES `shows` (`id`),
+  CONSTRAINT `booking_seats_ibfk_3`
+    FOREIGN KEY (`seat_id`) REFERENCES `seats` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 10. PAYMENTS
+CREATE TABLE `payments` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint unsigned NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `method` enum('DEMO','CARD','UPI','NETBANKING') COLLATE utf8mb4_unicode_ci DEFAULT 'DEMO',
+  `status` enum('PENDING','SUCCESS','FAILED','REFUNDED') COLLATE utf8mb4_unicode_ci DEFAULT 'PENDING',
+  `transaction_reference` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `booking_id` (`booking_id`),
+  CONSTRAINT `payments_ibfk_1`
+    FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 11. TICKETS
+CREATE TABLE `tickets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `booking_id` bigint unsigned NOT NULL,
+  `ticket_code` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `issued_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ticket_code` (`ticket_code`),
+  KEY `booking_id` (`booking_id`),
+  CONSTRAINT `tickets_ibfk_1`
+    FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
