@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 
-:root {
-  font-family: "DM Sans", sans-serif;
-=======
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  font-family: 'DM Sans', sans-serif;
->>>>>>> origin/main
+  font-family: "DM Sans", sans-serif;
   color: #f5f7ff;
   background: #070a12;
   font-synthesis: none;
@@ -48,11 +42,7 @@ body,
 button,
 input,
 select {
-<<<<<<< HEAD
   font-family: "DM Sans", sans-serif;
-=======
-  font-family: 'DM Sans', sans-serif;
->>>>>>> origin/main
 }
 
 button,
@@ -88,10 +78,10 @@ img {
 :focus-visible {
   outline: 2px solid #60a5fa;
   outline-offset: 3px;
-<<<<<<< HEAD
 }
 
 /* Make native date and time controls visible in dark theme */
+
 input[type="date"],
 input[type="time"] {
   color-scheme: dark;
@@ -441,6 +431,3 @@ input[type="time"] {
     font-size: 30px;
   }
 }
-=======
-}
->>>>>>> origin/main
