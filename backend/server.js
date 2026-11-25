@@ -9,6 +9,7 @@ import movieRoutes from './routes/movies.js';
 import bookingRoutes from './routes/bookings.js';
 import showRoutes from './routes/shows.js';
 import adminRoutes from './routes/admin.js';
+import theatreRoutes from './routes/theatres.js';
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use('/api/movies', movieRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/shows', showRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/theatres', theatreRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

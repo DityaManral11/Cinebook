@@ -1,37 +1,28 @@
-
-import { Router } from 'express';
-import pool from '../db.js';
-import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { Router } from "express";
+import pool from "../db.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
 
 // Automatically generate shows for a selected date
 async function createShowsForDate(date) {
-  const [dateCheck] = await pool.execute(
-    'SELECT ? >= CURDATE() AS isValid',
-    [date]
-  );
+  const [dateCheck] = await pool.execute("SELECT ? >= CURDATE() AS isValid", [
+    date,
+  ]);
 
   if (!dateCheck[0].isValid) return;
 
-  const [screens] = await pool.execute(
-    'SELECT id FROM screens ORDER BY id'
-  );
+  const [screens] = await pool.execute("SELECT id FROM screens ORDER BY id");
 
   const [movies] = await pool.execute(
     `SELECT id, duration_minutes, base_price, language
      FROM movies
-     ORDER BY id`
+     ORDER BY id`,
   );
 
   if (!screens.length || !movies.length) return;
 
-  const timeSlots = [
-    '09:00:00',
-    '13:00:00',
-    '17:00:00',
-    '21:00:00'
-  ];
+  const timeSlots = ["09:00:00", "13:00:00", "17:00:00", "21:00:00"];
 
   for (let screenIndex = 0; screenIndex < screens.length; screenIndex++) {
     const screen = screens[screenIndex];
@@ -41,13 +32,10 @@ async function createShowsForDate(date) {
       const movie = movies[movieIndex];
 
       const startAt = `${date} ${timeSlots[slotIndex]}`;
-      const duration = Math.max(
-        Number(movie.duration_minutes) || 150,
-        60
-      );
+      const duration = Math.max(Number(movie.duration_minutes) || 150, 60);
 
       const price = Number(movie.base_price) || 220;
-      const language = movie.language || 'Hindi';
+      const language = movie.language || "Hindi";
 
       await pool.execute(
         `INSERT INTO shows
@@ -71,15 +59,15 @@ async function createShowsForDate(date) {
           screen.id,
           startAt,
           duration,
-          startAt
-        ]
+          startAt,
+        ],
       );
     }
   }
 }
 
 // ADMIN: Create a new show
-router.post('/', requireAuth, requireAdmin, async (req, res) => {
+router.post("/", requireAuth, requireAdmin, async (req, res) => {
   try {
     const {
       movieId,
@@ -87,47 +75,44 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       startsAt,
       price,
       language,
-      format = '2D'
+      format = "2D",
     } = req.body;
 
     if (!movieId || !screenId || !startsAt || !price) {
       return res.status(400).json({
-        message: 'Please provide all required show details.'
+        message: "Please provide all required show details.",
       });
     }
 
     if (Number(price) <= 0) {
       return res.status(400).json({
-        message: 'Ticket price must be greater than zero.'
+        message: "Ticket price must be greater than zero.",
       });
     }
 
     const [movies] = await pool.execute(
-      'SELECT duration_minutes, language FROM movies WHERE id = ?',
-      [movieId]
+      "SELECT duration_minutes, language FROM movies WHERE id = ?",
+      [movieId],
     );
 
     if (!movies.length) {
       return res.status(404).json({
-        message: 'Movie not found.'
+        message: "Movie not found.",
       });
     }
 
     const [screens] = await pool.execute(
-      'SELECT id FROM screens WHERE id = ?',
-      [screenId]
+      "SELECT id FROM screens WHERE id = ?",
+      [screenId],
     );
 
     if (!screens.length) {
       return res.status(404).json({
-        message: 'Screen not found.'
+        message: "Screen not found.",
       });
     }
 
-    const duration = Math.max(
-      Number(movies[0].duration_minutes) || 150,
-      60
-    );
+    const duration = Math.max(Number(movies[0].duration_minutes) || 150, 60);
 
     const [result] = await pool.execute(
       `INSERT INTO shows
@@ -146,44 +131,43 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
         startsAt,
         duration,
         price,
-        language || movies[0].language || 'Hindi',
+        language || movies[0].language || "Hindi",
         format,
         screenId,
         startsAt,
         duration,
-        startsAt
-      ]
+        startsAt,
+      ],
     );
 
     if (!result.affectedRows) {
       return res.status(409).json({
-        message: 'This screen already has an overlapping show.'
+        message: "This screen already has an overlapping show.",
       });
     }
 
     res.status(201).json({
-      message: 'Show created successfully.',
-      showId: result.insertId
+      message: "Show created successfully.",
+      showId: result.insertId,
     });
-
   } catch (error) {
-    console.error('Create Show Error:', error);
+    console.error("Create Show Error:", error);
 
     res.status(500).json({
-      message: 'Could not create show.'
+      message: "Could not create show.",
     });
   }
 });
 
 // GET all shows with filters
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { movieId, theatreId, date } = req.query;
 
     if (date) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({
-          message: 'Invalid date format. Use YYYY-MM-DD.'
+          message: "Invalid date format. Use YYYY-MM-DD.",
         });
       }
     }
@@ -217,63 +201,67 @@ router.get('/', async (req, res) => {
     const params = [];
 
     if (movieId) {
-      sql += ' AND s.movie_id = ?';
+      sql += " AND s.movie_id = ?";
       params.push(movieId);
     }
 
     if (theatreId) {
-      sql += ' AND t.id = ?';
+      sql += " AND t.id = ?";
       params.push(theatreId);
     }
 
     if (date) {
-      sql += ' AND DATE(s.starts_at) = ?';
+      sql += " AND DATE(s.starts_at) = ?";
       params.push(date);
     }
 
-    sql += ' ORDER BY s.starts_at ASC';
+    sql += " ORDER BY s.starts_at ASC";
 
     const [rows] = await pool.execute(sql, params);
 
     res.json(rows);
-
   } catch (error) {
-    console.error('Shows API Error:', error);
+    console.error("Shows API Error:", error);
 
     res.status(500).json({
-      message: 'Could not load shows.'
+      message: "Could not load shows.",
     });
   }
 });
 
 // GET movies and screens for admin show scheduling
-router.get('/options', async (req, res) => {
+router.get("/options", async (req, res) => {
   try {
     const [movies] = await pool.execute(
       `SELECT id, title, language, duration_minutes, base_price
        FROM movies
-       ORDER BY title`
+       ORDER BY title`,
     );
 
     const [screens] = await pool.execute(
-      `SELECT sc.id, sc.name, sc.total_seats,
-              t.name AS theatreName
+      `SELECT
+          sc.id,
+          sc.name,
+          sc.total_seats,
+          t.id AS theatreId,
+          t.name AS theatreName
        FROM screens sc
        JOIN theatres t ON sc.theatre_id = t.id
-       ORDER BY t.name, sc.name`
+       ORDER BY t.name, sc.name`,
     );
 
     res.json({ movies, screens });
   } catch (error) {
-    console.error('Show Options Error:', error);
+    console.error("Show Options Error:", error);
+
     res.status(500).json({
-      message: 'Could not load movies and screens.'
+      message: "Could not load movies and screens.",
     });
   }
 });
 
 // GET one show by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const [rows] = await pool.execute(
       `
@@ -299,22 +287,21 @@ router.get('/:id', async (req, res) => {
       JOIN theatres t ON sc.theatre_id = t.id
       WHERE s.id = ?
       `,
-      [req.params.id]
+      [req.params.id],
     );
 
     if (!rows.length) {
       return res.status(404).json({
-        message: 'Show not found.'
+        message: "Show not found.",
       });
     }
 
     res.json(rows[0]);
-
   } catch (error) {
-    console.error('Show Details API Error:', error);
+    console.error("Show Details API Error:", error);
 
     res.status(500).json({
-      message: 'Could not load show.'
+      message: "Could not load show.",
     });
   }
 });

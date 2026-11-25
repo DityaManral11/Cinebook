@@ -98,9 +98,9 @@ router.post("/register", async (req, res) => {
     );
 
     const [customerResult] = await connection.execute(
-      `INSERT INTO customers (name, email, password_hash, role)
-       VALUES (?, ?, ?, 'customer')`,
-      [cleanName, cleanEmail, passwordHash],
+      `INSERT INTO customers (user_id, name, email, password_hash, role)
+   VALUES (?, ?, ?, ?, 'customer')`,
+      [userResult.insertId, cleanName, cleanEmail, passwordHash],
     );
 
     await connection.commit();
@@ -172,10 +172,17 @@ router.post("/login", async (req, res) => {
     // Create a customer record if an older account is missing one.
     // Existing roles are preserved.
     await pool.execute(
-      `INSERT INTO customers (name, email, password_hash, role)
-       VALUES (?, ?, ?, 'customer')
-       ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`,
-      [loggedInUser.name, loggedInUser.email, loggedInUser.password_hash],
+      `INSERT INTO customers (user_id, name, email, password_hash, role)
+   VALUES (?, ?, ?, ?, 'customer')
+   ON DUPLICATE KEY UPDATE
+     user_id = COALESCE(user_id, VALUES(user_id)),
+     id = LAST_INSERT_ID(id)`,
+      [
+        loggedInUser.id,
+        loggedInUser.name,
+        loggedInUser.email,
+        loggedInUser.password_hash,
+      ],
     );
 
     const [customers] = await pool.execute(
