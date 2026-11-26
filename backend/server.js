@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -15,18 +16,28 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
 
+// Allowed frontend origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://cinebook-dmnm.vercel.app",
+  "https://cinebook-rkbp-one.vercel.app",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+// CORS configuration
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      process.env.FRONTEND_URL,
-    ].filter(Boolean),
-  }),
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 app.use(express.json());
 
+// Backend status
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Welcome to CineBook API",
@@ -34,12 +45,18 @@ app.get("/", (req, res) => {
   });
 });
 
+// Database health check
 app.get("/api/health", async (_req, res) => {
   try {
     await pool.query("SELECT 1");
-    res.json({ status: "ok", database: "connected" });
+
+    res.status(200).json({
+      status: "ok",
+      database: "connected",
+    });
   } catch (error) {
     console.error("Database health check failed:", error.message);
+
     res.status(500).json({
       status: "error",
       database: "not connected",
@@ -47,6 +64,7 @@ app.get("/api/health", async (_req, res) => {
   }
 });
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/bookings", bookingRoutes);
@@ -54,12 +72,14 @@ app.use("/api/shows", showRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/theatres", theatreRoutes);
 
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     message: `Route not found: ${req.method} ${req.path}`,
   });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`CineBook API running on port ${PORT}`);
 });
